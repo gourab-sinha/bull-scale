@@ -1,9 +1,11 @@
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
-const { sendNewEmail } = require('./queues/emailqueue');
-
+const { sendNewEmail, bullBoardRouter } = require('./queues/emailqueue');
+const { router } = require('bull-board');
 app.use(bodyParser.json());
+
+app.use('/admin/queues', bullBoardRouter);
 
 app.post('/send-email',async (req, res) => {
     const { message, ...restBody } = req.body;
