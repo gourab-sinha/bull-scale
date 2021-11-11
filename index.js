@@ -6,7 +6,12 @@ const { sendNewEmail } = require('./queues/emailqueue');
 app.use(bodyParser.json());
 
 app.post('/send-email',async (req, res) => {
-    await sendNewEmail(req.body);
+    const { message, ...restBody } = req.body;
+    console.log(message, restBody ); 
+    await sendNewEmail({
+        ...restBody,
+        html: `<p>${message}</p>`
+    });
     res.send({
         status: 'ok'
     });
