@@ -1,6 +1,12 @@
 const nodemailer = require("nodemailer");
 
 async function emailProcess(job) {
+
+    console.log(`Attempt Number ${job.attemptsMade}`);
+    if (job.attemptsMade < 2) {
+        throw new Error('Server is down');
+    }
+     
     let testAccount = await nodemailer.createTestAccount();
 
     // create reusable transporter object using the default SMTP transport

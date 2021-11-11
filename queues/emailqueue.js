@@ -13,7 +13,7 @@ emailQueue.process(emailProcess);
 async function sendNewEmail(data) {
     console.log(data);
     emailQueue.add(data, {
-        attempts: 2,
+        attempts: 5,
     });
 };
 
