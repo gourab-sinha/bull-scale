@@ -29,6 +29,18 @@ async function sendNewEmail(data) {
     });
 };
 
+async function getEmail(data) {
+    console.log(data);
+    emailQueue.add(data, {
+        attempts: 5,
+        delay: 5000,
+        repeat: {
+            every: 1000,
+            limit: 5
+        }
+    });
+};
+
 module.exports.sendNewEmail = sendNewEmail;
 module.exports.bullBoardRouter = router;
 
