@@ -1,10 +1,9 @@
 const bodyParser = require('body-parser');
-const { sendNewEmail, bullBoardRouter } = require('./queues/emailqueue');
+const { sendNewEmail, bullBoardRouter, sendNewEmailInQueue } = require('./queues/emailqueue');
 
 const express = require('express');
 const port = 5000;
 const cluster = require('cluster');
-const { handleRoutes } = require('./routes');
 const totalCPUs = require('os').cpus().length;
 
 if (cluster.isMaster) {
@@ -25,23 +24,33 @@ if (cluster.isMaster) {
 } else {
     const app = express();
     console.log(`Worker ${process.pid} started`);
+    app.use(express.json());
     app.use('/admin/queues', bullBoardRouter);
 
     /* app.get('/send-email', async (req, res) => { 
      * for testing load and multiple workers handling produced data.
     */
     app.post('/send-email', async (req, res) => {
-        const message = "Welcome to Bull"; 
-        const restBody = {
-            "to": "lisa@example.com",
-            "from": "example@example.com",
-            "subject": "Hell From Bull",
-        };
+        const { message, ...restBody } = req.body;
+        // const message = "Welcome to Bull"; 
+        // const restBody = {
+        //     "to": "lisa@example.com",
+        //     "from": "example@example.com",
+        //     "subject": "Hell From Bull",
+        // };
         console.log(`Worker with ID ${process.pid} is running`);
-        await sendNewEmail({
-            ...restBody,
-            html: `<p>${message}</p>`
-        });
+        if (!restBody.jobType) {
+            await sendNewEmail({
+                ...restBody,
+                html: `<p>${message}</p>`
+            });
+        } else if (restBody.jobType === 'email') {
+            await sendNewEmailInQueue({
+                ...restBody,
+                html: `<p>${message}</p>`
+            });
+        }
+        
         res.send({
             status: 'ok'
         });
